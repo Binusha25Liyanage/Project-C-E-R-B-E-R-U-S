@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Cerberus Desktop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Sinhala:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">Cb</span>
+      <div class="brand-text">
+        <span class="brand-name">Cerberus</span>
+        <span class="brand-sub">Desktop · local ledger</span>
+      </div>
+    </div>
+
+    <button id="btn-new-schema" class="btn btn-accent btn-block">+ New Schema</button>
+
+    <nav id="schema-list" class="schema-list">
+      <!-- populated by JS -->
+      <div class="schema-list-empty">No schemas yet. Create one to start entering data.</div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="dot dot-live"></span> Local · offline
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="toolbar">
+      <div class="toolbar-title">
+        <h1 id="current-schema-name">Select a schema</h1>
+        <span id="record-count" class="record-count"></span>
+      </div>
+      <div class="toolbar-actions">
+        <button id="btn-add-row" class="btn btn-ghost" disabled>+ Add Record</button>
+        <button id="btn-export-csv" class="btn btn-ghost" disabled>Export CSV</button>
+        <button id="btn-edit-schema" class="btn btn-ghost" disabled>Edit Fields</button>
+      </div>
+    </header>
+
+    <div id="empty-state" class="empty-state">
+      <div class="stamp-mark">▤</div>
+      <h2>No schema selected</h2>
+      <p>A schema defines the fields for one type of record — an invoice, an outlet visit, a lead. Create one to open its ledger.</p>
+    </div>
+
+    <div id="grid-wrap" class="grid-wrap" style="display:none;">
+      <div id="grid"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Schema Builder Modal -->
+<div id="schema-modal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="schema-modal-title">New Schema</h2>
+      <button class="modal-close" data-close="schema-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label">Schema name</label>
+      <input id="schema-name-input" class="text-input" placeholder="e.g. Route Sales Invoices" />
+
+      <div class="field-builder-header">
+        <span>Fields</span>
+        <button id="btn-add-field" class="btn btn-small">+ Add Field</button>
+      </div>
+      <div id="field-list" class="field-list"></div>
+    </div>
+    <div class="modal-footer">
+      <span id="schema-error" class="form-error"></span>
+      <button id="btn-save-schema" class="btn btn-accent">Save Schema</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record Edit Modal -->
+<div id="record-modal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="record-modal-title">New Record</h2>
+      <button class="modal-close" data-close="record-modal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="record-form" class="record-form"></div>
+    </div>
+    <div class="modal-footer">
+      <span id="record-error" class="form-error"></span>
+      <button id="btn-save-record" class="btn btn-accent">Save Record</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" style="display:none;"></div>
+
+<script src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
