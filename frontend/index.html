@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>Cerberus Desktop</title>
+<link rel="icon" href="assets/brand_mark.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Sinhala:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
@@ -15,7 +16,7 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-mark">Cb</span>
+      <img class="brand-mark-img" src="assets/brand_mark.png" alt="Cerberus" />
       <div class="brand-text">
         <span class="brand-name">Cerberus</span>
         <span class="brand-sub">Desktop · local ledger</span>
@@ -24,8 +25,20 @@
 
     <button id="btn-new-schema" class="btn btn-accent btn-block">+ New Schema</button>
 
+    <div class="sidebar-section-label">Core Views</div>
+    <nav class="nav-list" id="nav-list">
+      <div class="nav-item" data-view="dashboard"><span class="nav-icon">▦</span> Dashboard</div>
+      <div class="nav-item" data-view="schema_editor"><span class="nav-icon">✎</span> Schema Editor</div>
+      <div class="nav-item" data-view="data_ledger"><span class="nav-icon">📒</span> Data Ledger</div>
+      <div class="nav-item" data-view="processing_queue">
+        <span class="nav-icon">⏱</span> Processing Queue
+        <span id="nav-job-badge" class="nav-job-badge" style="display:none;"></span>
+      </div>
+      <div class="nav-item" data-view="settings"><span class="nav-icon">⚙</span> Settings</div>
+    </nav>
+
+    <div class="sidebar-section-label">Schemas</div>
     <nav id="schema-list" class="schema-list">
-      <!-- populated by JS -->
       <div class="schema-list-empty">No schemas yet. Create one to start entering data.</div>
     </nav>
 
@@ -36,26 +49,47 @@
 
   <!-- Main -->
   <main class="main">
-    <header class="toolbar">
-      <div class="toolbar-title">
-        <h1 id="current-schema-name">Select a schema</h1>
-        <span id="record-count" class="record-count"></span>
-      </div>
-      <div class="toolbar-actions">
-        <button id="btn-add-row" class="btn btn-ghost" disabled>+ Add Record</button>
-        <button id="btn-export-csv" class="btn btn-ghost" disabled>Export CSV</button>
-        <button id="btn-edit-schema" class="btn btn-ghost" disabled>Edit Fields</button>
-      </div>
-    </header>
 
-    <div id="empty-state" class="empty-state">
-      <div class="stamp-mark">▤</div>
-      <h2>No schema selected</h2>
-      <p>A schema defines the fields for one type of record — an invoice, an outlet visit, a lead. Create one to open its ledger.</p>
+    <!-- Top app bar -->
+    <div class="app-topbar">
+      <h1 id="topbar-title">Cerberus Ledger</h1>
+      <div class="topbar-tools">
+        <div class="topbar-search">
+          <span class="icon">⌕</span>
+          <input id="topbar-search-input" placeholder="Search entries..." />
+        </div>
+        <button id="btn-refresh" class="topbar-icon-btn" title="Refresh current view">⟳</button>
+      </div>
     </div>
 
-    <div id="grid-wrap" class="grid-wrap" style="display:none;">
-      <div id="grid"></div>
+    <!-- Tab bar -->
+    <div class="tab-bar" id="tab-bar">
+      <div class="tab-strip" id="tab-strip"><!-- tabs render here --></div>
+      <div class="tab-new-wrap">
+        <button id="btn-new-tab" class="tab-new-btn" title="Open a new tab">+</button>
+        <div id="tab-new-menu" class="tab-new-menu" style="display:none;">
+          <div class="tab-new-menu-label">Open in a new tab</div>
+          <div id="tab-new-menu-schemas"><!-- schema options render here --></div>
+          <div class="tab-menu-divider"></div>
+          <button class="tab-menu-item" data-new-tab="bulk_import">📥 Bulk Import (xlsx / csv / docx)</button>
+          <div class="tab-menu-divider"></div>
+          <button class="tab-menu-item" disabled>📷 OCR Capture <span class="soon">Phase 3</span></button>
+          <button class="tab-menu-item" disabled>🌐 Web Scraper <span class="soon">Phase 4</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active tab content -->
+    <div id="tab-content" class="tab-content">
+      <div id="empty-state" class="empty-state">
+        <div class="stamp-mark">▤</div>
+        <h2>No tabs open</h2>
+        <p>Open a schema from the sidebar, or start a bulk import. Background jobs keep running even when their tab isn't focused.</p>
+        <div class="empty-state-actions">
+          <button id="btn-browse-archives" class="btn btn-outline">Browse Archives</button>
+          <button id="btn-empty-bulk-import" class="btn btn-accent">New Bulk Import</button>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -78,8 +112,12 @@
       <div id="field-list" class="field-list"></div>
     </div>
     <div class="modal-footer">
-      <span id="schema-error" class="form-error"></span>
-      <button id="btn-save-schema" class="btn btn-accent">Save Schema</button>
+      <span class="modal-footer-note">Modifications apply to future ledger entries only.</span>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="schema-error" class="form-error"></span>
+        <button id="btn-cancel-schema" class="btn btn-ghost" data-close="schema-modal">Cancel</button>
+        <button id="btn-save-schema" class="btn btn-accent">Save Schema</button>
+      </div>
     </div>
   </div>
 </div>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cerberus Ledger - Schema Builder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#e1e3e2",
+                    "on-tertiary-fixed": "#1a1c1a",
+                    "secondary-fixed-dim": "#c7c6ca",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#c7c6c4",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#525351",
+                    "on-background": "#191c1c",
+                    "on-primary-fixed-variant": "#8b152d",
+                    "on-error-container": "#93000a",
+                    "primary-fixed": "#ffdadb",
+                    "surface-container": "#edeeee",
+                    "secondary-fixed": "#e3e2e6",
+                    "on-tertiary-container": "#c7c7c4",
+                    "on-primary-container": "#ffb2b7",
+                    "secondary": "#5e5e62",
+                    "secondary-container": "#e0dfe3",
+                    "error": "#ba1a1a",
+                    "on-tertiary-fixed-variant": "#464745",
+                    "on-secondary-fixed": "#1b1b1f",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#ffb2b7",
+                    "inverse-on-surface": "#eff1f0",
+                    "tertiary": "#3b3c3a",
+                    "on-surface-variant": "#584142",
+                    "surface-container-high": "#e7e8e8",
+                    "on-surface": "#191c1c",
+                    "surface-variant": "#e1e3e2",
+                    "surface-bright": "#f8faf9",
+                    "outline-variant": "#dfbfc0",
+                    "surface-container-low": "#f2f4f3",
+                    "primary-fixed-dim": "#ffb2b7",
+                    "on-primary-fixed": "#40000d",
+                    "primary-container": "#9c2338",
+                    "on-secondary-fixed-variant": "#46464a",
+                    "primary": "#7b0523",
+                    "surface-tint": "#ac2f43",
+                    "background": "#f8faf9",
+                    "tertiary-fixed": "#e3e2e0",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#626266",
+                    "surface": "#f8faf9",
+                    "surface-dim": "#d9dada",
+                    "outline": "#8b7171",
+                    "inverse-surface": "#2e3131",
+                    "error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "stack-md": "16px",
+                    "stack-xs": "4px",
+                    "stack-lg": "24px",
+                    "margin-page": "32px",
+                    "sidebar-width": "260px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "h2": ["Space Grotesk"],
+                    "body-lg": ["IBM Plex Sans"],
+                    "body-md": ["IBM Plex Sans"],
+                    "h3": ["Space Grotesk"],
+                    "data-table": ["IBM Plex Mono"],
+                    "h1": ["Space Grotesk"],
+                    "stamp-label": ["IBM Plex Sans"],
+                    "label-caps": ["IBM Plex Sans"]
+            },
+            "fontSize": {
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "h3": ["18px", {"lineHeight": "24px", "fontWeight": "500"}],
+                    "data-table": ["13px", {"lineHeight": "18px", "fontWeight": "450"}],
+                    "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "stamp-label": ["11px", {"lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'IBM Plex Sans', sans-serif; }
+        .bg-dimmed { background-color: rgba(25, 28, 28, 0.4); backdrop-filter: blur(2px); }
+        .stamp-badge { transform: rotate(-2deg); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface h-screen w-screen overflow-hidden flex font-body-md">
+<!-- Background Context: App Shell (Dimmed) -->
+<div class="fixed inset-0 w-full h-full flex z-0">
+<!-- SideNav (Dimmed) -->
+<nav class="w-[260px] h-screen fixed left-0 top-0 flex flex-col border-r border-tertiary-container dark:border-tertiary-container bg-on-tertiary-fixed dark:bg-on-tertiary-fixed flex flex-col justify-between py-stack-lg z-10 hidden md:flex opacity-50">
+<div>
+<div class="px-margin-page mb-stack-lg">
+<h1 class="font-h2 text-h2 font-bold tracking-tighter text-on-tertiary dark:text-on-tertiary">CERBERUS</h1>
+<p class="font-label-caps text-label-caps text-on-tertiary-container">Local Data Ledger</p>
+</div>
+<div class="px-4 mb-stack-lg">
+<button class="w-full py-2 px-4 bg-primary text-on-primary font-label-caps text-label-caps rounded flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                        + New Schema
+                    </button>
+</div>
+<ul class="flex flex-col gap-1">
+<li><a class="text-on-tertiary-container hover:text-on-tertiary px-4 py-3 flex items-center gap-3 transition-all hover:bg-tertiary-container dark:hover:bg-tertiary-container duration-200" href="#"><span class="material-symbols-outlined">dashboard</span> <span class="font-label-caps text-label-caps">Dashboard</span></a></li>
+<li><a class="border-l-[3px] border-primary bg-tertiary-container text-on-tertiary font-bold px-4 py-3 flex items-center gap-3 transition-all scale-95" href="#"><span class="material-symbols-outlined">schema</span> <span class="font-label-caps text-label-caps">Schema Editor</span></a></li>
+<li><a class="text-on-tertiary-container hover:text-on-tertiary px-4 py-3 flex items-center gap-3 transition-all hover:bg-tertiary-container dark:hover:bg-tertiary-container duration-200" href="#"><span class="material-symbols-outlined">account_balance</span> <span class="font-label-caps text-label-caps">Data Ledger</span></a></li>
+<li><a class="text-on-tertiary-container hover:text-on-tertiary px-4 py-3 flex items-center gap-3 transition-all hover:bg-tertiary-container dark:hover:bg-tertiary-container duration-200" href="#"><span class="material-symbols-outlined">pending_actions</span> <span class="font-label-caps text-label-caps">Processing Queue</span></a></li>
+<li><a class="text-on-tertiary-container hover:text-on-tertiary px-4 py-3 flex items-center gap-3 transition-all hover:bg-tertiary-container dark:hover:bg-tertiary-container duration-200" href="#"><span class="material-symbols-outlined">settings</span> <span class="font-label-caps text-label-caps">Settings</span></a></li>
+</ul>
+</div>
+<div class="px-4 mt-auto">
+<a class="text-on-tertiary-container hover:text-on-tertiary px-4 py-3 flex items-center gap-3 transition-all hover:bg-tertiary-container dark:hover:bg-tertiary-container duration-200" href="#"><span class="material-symbols-outlined">cloud_off</span> <span class="font-label-caps text-label-caps">Local · Offline</span></a>
+</div>
+</nav>
+<!-- Main Content Area (Dimmed) -->
+<main class="flex-1 flex flex-col ml-[260px] opacity-50 relative z-0">
+<!-- TopAppBar -->
+<header class="h-12 w-full flex items-center bg-surface-container-low dark:bg-surface-container-low border-b border-surface-container-highest flex justify-between items-center px-margin-page">
+<div class="flex items-center gap-4">
+<span class="font-h3 text-h3 font-bold text-primary dark:text-inverse-primary">Cerberus Ledger</span>
+<nav class="flex items-center gap-2 ml-4">
+<a class="text-primary border-b-2 border-primary font-bold px-2 py-1 font-label-caps text-label-caps" href="#">Active Batch</a>
+<a class="text-on-surface-variant font-medium px-2 py-1 font-label-caps text-label-caps hover:text-primary transition-colors" href="#">History</a>
+<a class="text-on-surface-variant font-medium px-2 py-1 font-label-caps text-label-caps hover:text-primary transition-colors" href="#">Archive</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="pl-8 pr-3 py-1 border border-surface-container-highest bg-surface-container-lowest text-body-md font-body-md rounded-none w-48 focus:border-primary focus:ring-0" placeholder="Search..." type="text"/>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">refresh</span></button>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+</header>
+<!-- Dummy Grid Content -->
+<div class="p-margin-page bg-surface flex-1 overflow-auto">
+<div class="bg-surface-container-lowest border border-[#DEDACE] p-4 flex flex-col gap-4">
+<div class="h-64 border-b border-surface-container-highest w-full bg-surface-container flex items-center justify-center text-on-surface-variant font-data-table">Data Grid Background</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-dimmed flex items-center justify-center z-50 p-4">
+<!-- Modal Card -->
+<div class="bg-surface-container-lowest border-2 border-on-surface w-full max-w-2xl max-h-[90vh] flex flex-col shadow-[0_4px_20px_rgba(25,28,28,0.2)]">
+<!-- Modal Header -->
+<div class="px-6 py-4 border-b border-[#DEDACE] flex justify-between items-center bg-[#F1EFE9]">
+<h2 class="font-h3 text-h3 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">schema</span>
+                    Edit Schema: Invoices
+                </h2>
+<button class="text-on-surface-variant hover:text-primary transition-colors focus:outline-none p-1">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Body (Scrollable) -->
+<div class="p-6 overflow-y-auto flex-1 flex flex-col gap-stack-lg bg-surface">
+<!-- Schema Name Input -->
+<div class="flex flex-col gap-stack-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wide" for="schemaName">Schema Name</label>
+<input class="w-full bg-surface-container-lowest border border-[#DEDACE] px-3 py-2 font-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-0 transition-colors" id="schemaName" type="text" value="Invoices"/>
+</div>
+<!-- Fields Section -->
+<div class="flex flex-col gap-stack-md">
+<div class="flex justify-between items-center border-b border-[#DEDACE] pb-2">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wide">Fields</h3>
+<button class="font-label-caps text-label-caps text-primary hover:text-primary-container flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 16px;">add</span> Add Field
+                        </button>
+</div>
+<!-- Field Rows (Bento/Card style) -->
+<div class="flex flex-col gap-stack-sm">
+<!-- Row 1: Invoice_ID -->
+<div class="flex items-center gap-4 bg-surface-container-lowest border border-[#DEDACE] p-3 hover:border-primary-fixed-dim transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing">drag_indicator</span>
+<div class="flex-1 grid grid-cols-12 gap-4 items-center">
+<div class="col-span-5">
+<input class="w-full bg-transparent border-0 border-b border-transparent hover:border-[#DEDACE] focus:border-primary focus:ring-0 px-1 py-1 font-data-table text-data-table text-on-surface" placeholder="Field Name" type="text" value="Invoice_ID"/>
+</div>
+<div class="col-span-4">
+<select class="w-full bg-surface-container-lowest border border-[#DEDACE] px-2 py-1 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-0">
+<option selected="">Text</option>
+<option>Number</option>
+<option>Date</option>
+<option>Dropdown</option>
+</select>
+</div>
+<div class="col-span-3 flex items-center justify-end gap-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="form-checkbox h-4 w-4 text-primary border-[#DEDACE] rounded-none focus:ring-primary focus:ring-offset-0 bg-surface-container-lowest" type="checkbox"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Req</span>
+</label>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-error opacity-0 group-hover:opacity-100 transition-opacity p-1"><span class="material-symbols-outlined">delete</span></button>
+</div>
+<!-- Row 2: Date -->
+<div class="flex items-center gap-4 bg-surface-container-lowest border border-[#DEDACE] p-3 hover:border-primary-fixed-dim transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing">drag_indicator</span>
+<div class="flex-1 grid grid-cols-12 gap-4 items-center">
+<div class="col-span-5">
+<input class="w-full bg-transparent border-0 border-b border-transparent hover:border-[#DEDACE] focus:border-primary focus:ring-0 px-1 py-1 font-data-table text-data-table text-on-surface" placeholder="Field Name" type="text" value="Date"/>
+</div>
+<div class="col-span-4">
+<select class="w-full bg-surface-container-lowest border border-[#DEDACE] px-2 py-1 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-0">
+<option>Text</option>
+<option>Number</option>
+<option selected="">Date</option>
+<option>Dropdown</option>
+</select>
+</div>
+<div class="col-span-3 flex items-center justify-end gap-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="form-checkbox h-4 w-4 text-primary border-[#DEDACE] rounded-none focus:ring-primary focus:ring-offset-0 bg-surface-container-lowest" type="checkbox"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Req</span>
+</label>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-error opacity-0 group-hover:opacity-100 transition-opacity p-1"><span class="material-symbols-outlined">delete</span></button>
+</div>
+<!-- Row 3: Total_Amount -->
+<div class="flex items-center gap-4 bg-surface-container-lowest border border-[#DEDACE] p-3 hover:border-primary-fixed-dim transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing">drag_indicator</span>
+<div class="flex-1 grid grid-cols-12 gap-4 items-center">
+<div class="col-span-5">
+<input class="w-full bg-transparent border-0 border-b border-transparent hover:border-[#DEDACE] focus:border-primary focus:ring-0 px-1 py-1 font-data-table text-data-table text-on-surface" placeholder="Field Name" type="text" value="Total_Amount"/>
+</div>
+<div class="col-span-4">
+<select class="w-full bg-surface-container-lowest border border-[#DEDACE] px-2 py-1 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-0">
+<option>Text</option>
+<option selected="">Number</option>
+<option>Date</option>
+<option>Dropdown</option>
+</select>
+</div>
+<div class="col-span-3 flex items-center justify-end gap-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="form-checkbox h-4 w-4 text-primary border-[#DEDACE] rounded-none focus:ring-primary focus:ring-offset-0 bg-surface-container-lowest" type="checkbox"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Req</span>
+</label>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-error opacity-0 group-hover:opacity-100 transition-opacity p-1"><span class="material-symbols-outlined">delete</span></button>
+</div>
+<!-- Row 4: Status (Complex row) -->
+<div class="flex items-start gap-4 bg-surface-container-lowest border border-[#DEDACE] p-3 hover:border-primary-fixed-dim transition-colors group relative">
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing mt-1">drag_indicator</span>
+<div class="flex-1 flex flex-col gap-2">
+<div class="grid grid-cols-12 gap-4 items-center">
+<div class="col-span-5">
+<input class="w-full bg-transparent border-0 border-b border-transparent hover:border-[#DEDACE] focus:border-primary focus:ring-0 px-1 py-1 font-data-table text-data-table text-on-surface" placeholder="Field Name" type="text" value="Status"/>
+</div>
+<div class="col-span-4">
+<select class="w-full bg-surface-container-lowest border border-[#DEDACE] px-2 py-1 font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-0">
+<option>Text</option>
+<option>Number</option>
+<option>Date</option>
+<option selected="">Dropdown</option>
+</select>
+</div>
+<div class="col-span-3 flex items-center justify-end gap-3">
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="form-checkbox h-4 w-4 text-primary border-[#DEDACE] rounded-none focus:ring-primary focus:ring-offset-0 bg-surface-container-lowest" type="checkbox"/>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Req</span>
+</label>
+</div>
+</div>
+<!-- Dropdown Options Sub-panel -->
+<div class="pl-1 mt-1 flex flex-wrap gap-2 items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mr-1">Options:</span>
+<div class="inline-flex items-center gap-1 bg-surface border border-[#DEDACE] px-2 py-0.5 stamp-badge">
+<span class="font-stamp-label text-stamp-label text-on-surface uppercase">Approved</span>
+<button class="text-on-surface-variant hover:text-error h-3 w-3 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size: 12px;">close</span></button>
+</div>
+<div class="inline-flex items-center gap-1 bg-surface border border-[#DEDACE] px-2 py-0.5 stamp-badge">
+<span class="font-stamp-label text-stamp-label text-on-surface uppercase">Pending</span>
+<button class="text-on-surface-variant hover:text-error h-3 w-3 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size: 12px;">close</span></button>
+</div>
+<div class="inline-flex items-center gap-1 bg-surface border border-[#DEDACE] px-2 py-0.5 stamp-badge">
+<span class="font-stamp-label text-stamp-label text-on-surface uppercase">Error</span>
+<button class="text-on-surface-variant hover:text-error h-3 w-3 flex items-center justify-center"><span class="material-symbols-outlined" style="font-size: 12px;">close</span></button>
+</div>
+<button class="text-primary hover:text-primary-container font-label-caps text-label-caps ml-2 flex items-center gap-1"><span class="material-symbols-outlined" style="font-size: 14px;">add</span> Add</button>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-error opacity-0 group-hover:opacity-100 transition-opacity p-1 mt-1"><span class="material-symbols-outlined">delete</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 border-t border-[#DEDACE] bg-[#F1EFE9] flex justify-between items-center">
+<span class="font-body-md text-body-md text-on-surface-variant italic">Modifications apply to future ledger entries only.</span>
+<div class="flex gap-4">
+<button class="px-4 py-2 font-label-caps text-label-caps text-on-surface hover:bg-surface-container-highest transition-colors rounded-none">Cancel</button>
+<button class="px-6 py-2 bg-primary hover:bg-primary-container text-on-primary font-label-caps text-label-caps flex items-center gap-2 transition-colors rounded-none border border-transparent">
+<span class="material-symbols-outlined" style="font-size: 18px;">save</span>
+                        Save Schema
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</body></html>

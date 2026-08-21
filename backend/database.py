@@ -61,8 +61,22 @@ class Database:
                     timestamp TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS jobs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_type TEXT NOT NULL,
+                    schema_id INTEGER,
+                    status TEXT NOT NULL DEFAULT 'queued',
+                    title TEXT,
+                    progress_json TEXT NOT NULL DEFAULT '{}',
+                    result_json TEXT,
+                    error TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+
                 CREATE INDEX IF NOT EXISTS idx_records_schema ON records(schema_id);
                 CREATE INDEX IF NOT EXISTS idx_audit_record ON audit_log(record_id);
+                CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
                 """
             )
 
@@ -186,6 +200,64 @@ class Database:
         }
 
     # ---------------- Audit log ----------------
+
+    # ---------------- Jobs (bulk import, and later OCR / scraping) ----------------
+
+    def create_job(self, job_type, schema_id=None, title=None):
+        with DB_LOCK, self._connect() as conn:
+            now = _now()
+            cur = conn.execute(
+                """INSERT INTO jobs (job_type, schema_id, status, title, progress_json, created_at, updated_at)
+                   VALUES (?, ?, 'queued', ?, '{}', ?, ?)""",
+                (job_type, schema_id, title, now, now),
+            )
+            return cur.lastrowid
+
+    def update_job(self, job_id, status=None, progress=None, result=None, error=None):
+        with DB_LOCK, self._connect() as conn:
+            current = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+            if not current:
+                return False
+            new_status = status if status is not None else current["status"]
+            new_progress = json.dumps(progress) if progress is not None else current["progress_json"]
+            new_result = json.dumps(result) if result is not None else current["result_json"]
+            new_error = error if error is not None else current["error"]
+            conn.execute(
+                """UPDATE jobs SET status = ?, progress_json = ?, result_json = ?, error = ?, updated_at = ?
+                   WHERE id = ?""",
+                (new_status, new_progress, new_result, new_error, _now(), job_id),
+            )
+            return True
+
+    def get_job(self, job_id):
+        with DB_LOCK, self._connect() as conn:
+            row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+            return self._job_row_to_dict(row) if row else None
+
+    def list_jobs(self, active_only=False):
+        with DB_LOCK, self._connect() as conn:
+            if active_only:
+                rows = conn.execute(
+                    "SELECT * FROM jobs WHERE status IN ('queued','running') ORDER BY created_at DESC"
+                ).fetchall()
+            else:
+                rows = conn.execute("SELECT * FROM jobs ORDER BY created_at DESC LIMIT 50").fetchall()
+            return [self._job_row_to_dict(r) for r in rows]
+
+    @staticmethod
+    def _job_row_to_dict(row):
+        return {
+            "id": row["id"],
+            "job_type": row["job_type"],
+            "schema_id": row["schema_id"],
+            "status": row["status"],
+            "title": row["title"],
+            "progress": json.loads(row["progress_json"]) if row["progress_json"] else {},
+            "result": json.loads(row["result_json"]) if row["result_json"] else None,
+            "error": row["error"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+        }
 
     def get_audit_log(self, record_id):
         with DB_LOCK, self._connect() as conn:

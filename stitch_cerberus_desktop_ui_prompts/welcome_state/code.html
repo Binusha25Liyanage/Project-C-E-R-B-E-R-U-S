@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cerberus Ledger - Welcome</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e1e3e2",
+                        "on-tertiary-fixed": "#1a1c1a",
+                        "secondary-fixed-dim": "#c7c6ca",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#c7c6c4",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#525351",
+                        "on-background": "#191c1c",
+                        "on-primary-fixed-variant": "#8b152d",
+                        "on-error-container": "#93000a",
+                        "primary-fixed": "#ffdadb",
+                        "surface-container": "#edeeee",
+                        "secondary-fixed": "#e3e2e6",
+                        "on-tertiary-container": "#c7c7c4",
+                        "on-primary-container": "#ffb2b7",
+                        "secondary": "#5e5e62",
+                        "secondary-container": "#e0dfe3",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#464745",
+                        "on-secondary-fixed": "#1b1b1f",
+                        "on-secondary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb2b7",
+                        "inverse-on-surface": "#eff1f0",
+                        "tertiary": "#3b3c3a",
+                        "on-surface-variant": "#584142",
+                        "surface-container-high": "#e7e8e8",
+                        "on-surface": "#191c1c",
+                        "surface-variant": "#e1e3e2",
+                        "surface-bright": "#f8faf9",
+                        "outline-variant": "#dfbfc0",
+                        "surface-container-low": "#f2f4f3",
+                        "primary-fixed-dim": "#ffb2b7",
+                        "on-primary-fixed": "#40000d",
+                        "primary-container": "#9c2338",
+                        "on-secondary-fixed-variant": "#46464a",
+                        "primary": "#7b0523",
+                        "surface-tint": "#ac2f43",
+                        "background": "#f8faf9",
+                        "tertiary-fixed": "#e3e2e0",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#626266",
+                        "surface": "#f8faf9",
+                        "surface-dim": "#d9dada",
+                        "outline": "#8b7171",
+                        "inverse-surface": "#2e3131",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "stack-xs": "4px",
+                        "stack-lg": "24px",
+                        "margin-page": "32px",
+                        "sidebar-width": "260px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Space Grotesk"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "body-md": ["IBM Plex Sans"],
+                        "h3": ["Space Grotesk"],
+                        "data-table": ["IBM Plex Mono"],
+                        "h1": ["Space Grotesk"],
+                        "stamp-label": ["IBM Plex Sans"],
+                        "label-caps": ["IBM Plex Sans"]
+                    },
+                    "fontSize": {
+                        "h2": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "h3": ["18px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "data-table": ["13px", { "lineHeight": "18px", "fontWeight": "450" }],
+                        "h1": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "stamp-label": ["11px", { "lineHeight": "12px", "letterSpacing": "0.08em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: #525351;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar -->
+<nav class="w-[260px] h-screen fixed left-0 top-0 flex flex-col bg-on-tertiary-fixed border-r border-tertiary-container z-50">
+<!-- Header -->
+<div class="px-margin-page py-stack-lg border-b border-tertiary-container">
+<div class="flex items-center gap-3 mb-stack-md">
+<img alt="Cerberus Logo" class="w-8 h-8 rounded object-cover" data-alt="A small, stylized circular emblem featuring a three-headed dog in a deep black mercury tone, highly detailed with intricate linework, set against a warm paper-textured background. The aesthetic is tactile and authoritative, suitable for a professional data ledger application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-l5AnrOJMvR2FC94LDrVWDdFdDPmZ-rAkMO9-7rqc9CbSLb2yVMgQJkgsWpTTEhEowywGFUU-r_BVEUqXbyD_VqBCBFgnfGkT-11Ye2aBNN5jU9R0rbZDbY2ou3f8usQmhzkrl1NVDFB-l2Q-rJVIuMPGcw1AH3IdXtmh8Uae3s4_g--mRaXvMLXGS0N3__ZgYwfel8FzK1yv05p4skIGsoUNTNXYKCPslVqTMfOAcazyGElFZGBc"/>
+<div>
+<h1 class="font-h2 text-h2 font-bold tracking-tighter text-on-tertiary uppercase">CERBERUS</h1>
+<p class="font-label-caps text-label-caps text-on-tertiary-container">Local Data Ledger</p>
+</div>
+</div>
+<button class="w-full bg-primary text-on-primary font-label-caps text-label-caps py-2 px-4 rounded flex items-center justify-center gap-2 hover:bg-primary-container transition-colors duration-200">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                + New Schema
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto sidebar-scroll py-stack-md flex flex-col gap-1">
+<div class="px-margin-page mb-2">
+<span class="font-stamp-label text-stamp-label text-tertiary-fixed-dim uppercase tracking-widest">Core Views</span>
+</div>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-fixed-dim">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-fixed-dim">schema</span>
+<span class="font-label-caps text-label-caps">Schema Editor</span>
+</a>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-fixed-dim">account_balance</span>
+<span class="font-label-caps text-label-caps">Data Ledger</span>
+</a>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-fixed-dim">pending_actions</span>
+<span class="font-label-caps text-label-caps">Processing Queue</span>
+</a>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary-fixed-dim">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+<div class="px-margin-page mt-stack-lg mb-2">
+<span class="font-stamp-label text-stamp-label text-tertiary-fixed-dim uppercase tracking-widest">Recent Schemas</span>
+</div>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-2 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container" href="#">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">description</span>
+<span class="font-body-md text-body-md truncate">Invoices</span>
+</a>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-2 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container" href="#">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">description</span>
+<span class="font-body-md text-body-md truncate">Leads</span>
+</a>
+<a class="text-on-tertiary-container hover:text-on-tertiary px-margin-page py-2 flex items-center gap-3 transition-colors duration-200 hover:bg-tertiary-container" href="#">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">description</span>
+<span class="font-body-md text-body-md truncate">Outlet Visits</span>
+</a>
+</div>
+<!-- Footer -->
+<div class="px-margin-page py-stack-md border-t border-tertiary-container flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-surface-tint"></div>
+<span class="font-label-caps text-label-caps text-on-tertiary-container flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">cloud_off</span>
+                Local · Offline
+            </span>
+</div>
+</nav>
+<!-- Main Workspace -->
+<main class="ml-[260px] flex-1 flex flex-col bg-surface min-h-screen">
+<!-- TopAppBar (Empty State) -->
+<header class="h-12 w-full flex items-center justify-between px-margin-page bg-surface-container-low border-b border-surface-container-highest shrink-0">
+<div class="flex items-center gap-4">
+<!-- No active tabs -->
+</div>
+<div class="flex items-center gap-3 text-secondary">
+<button class="p-1 hover:bg-surface-container-highest rounded transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+</div>
+</header>
+<!-- Empty State Canvas -->
+<div class="flex-1 flex flex-col items-center justify-center p-margin-page">
+<div class="max-w-md text-center flex flex-col items-center gap-stack-lg">
+<!-- Stylized Icon Mark -->
+<div class="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center border border-surface-container-highest mb-4 shadow-sm relative">
+<span class="material-symbols-outlined text-[48px] text-secondary opacity-50">data_object</span>
+<!-- Decorative stamp -->
+<div class="absolute -bottom-2 -right-2 bg-surface px-2 py-1 border-[1.5px] border-outline text-outline transform -rotate-2">
+<span class="font-stamp-label text-stamp-label uppercase">Idle</span>
+</div>
+</div>
+<!-- Headline & Copy -->
+<div class="space-y-stack-sm">
+<h2 class="font-h1 text-h1 text-on-surface">No tabs open</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-sm mx-auto leading-relaxed">
+                        Open a schema from the sidebar or start a bulk import. Background jobs keep running even when their tab isn't focused.
+                    </p>
+</div>
+<!-- Subtle Action -->
+<div class="mt-stack-md flex gap-4">
+<button class="px-6 py-2 border-[1.5px] border-outline text-on-surface font-label-caps text-label-caps hover:bg-surface-container-low transition-colors rounded">
+                        Browse Archives
+                    </button>
+<button class="px-6 py-2 bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary-container transition-colors rounded shadow-sm">
+                        New Bulk Import
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>
