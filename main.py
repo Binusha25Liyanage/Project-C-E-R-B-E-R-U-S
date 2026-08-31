@@ -9,7 +9,9 @@ import webview
 from backend.api import Api
 
 FRONTEND_INDEX = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
-ICON_PATH = os.path.join(os.path.dirname(__file__), "frontend", "assets", "app_icon.ico")
+# Note: app_icon.ico (in frontend/assets/) isn't loaded here. pywebview has no
+# cross-platform runtime API for setting a window icon. On Windows, the exe's
+# icon is set at build time instead: `pyinstaller --icon=frontend/assets/app_icon.ico ...`
 
 
 def main():
@@ -23,9 +25,7 @@ def main():
         min_size=(1000, 650),
     )
     api.window = window  # so Api methods can open file dialogs
-    # icon is used for the taskbar/title bar on Windows; harmless no-op on platforms
-    # where pywebview doesn't support a custom window icon.
-    webview.start(debug=False, icon=ICON_PATH)
+    webview.start(debug=False)
 
 
 if __name__ == "__main__":
