@@ -1,8 +1,7 @@
 """
 Bulk import: read many spreadsheet/Word-table files that share one structure,
 map their columns to a schema's fields once, and import all rows through the
-same validate_record() pipeline used by manual entry - so a bulk-imported
-row and a hand-typed row are held to identical rules.
+same validate_record() pipeline used by manual entry.
 """
 
 import os
@@ -14,7 +13,6 @@ from .validation import validate_record
 
 
 def read_file_columns(file_path):
-    """Return the header row of a file, for the column-mapping UI."""
     ext = os.path.splitext(file_path)[1].lower()
     if ext == ".csv":
         with open(file_path, newline="", encoding="utf-8-sig") as f:
@@ -36,7 +34,6 @@ def read_file_columns(file_path):
 
 
 def _read_file_rows(file_path):
-    """Yield each data row (dict keyed by the file's own header names)."""
     ext = os.path.splitext(file_path)[1].lower()
 
     if ext == ".csv":
@@ -52,7 +49,7 @@ def _read_file_rows(file_path):
         headers = [str(c) if c is not None else "" for c in next(rows_iter, ())]
         for raw_row in rows_iter:
             if all(v is None for v in raw_row):
-                continue  # skip fully blank rows
+                continue
             yield {headers[i]: raw_row[i] for i in range(len(headers)) if i < len(raw_row)}
 
     elif ext == ".docx":
@@ -70,11 +67,6 @@ def _read_file_rows(file_path):
 
 
 def run_bulk_import(db, job_id, schema, file_paths, column_mapping, batch_label, progress_cb):
-    """
-    column_mapping: { schema_field_name: source_column_name_or_None }
-    progress_cb(processed_files, total_files, current_file, rows_done, rows_total)
-    Returns a result dict summarizing the whole batch.
-    """
     fields = schema["fields"]
     file_results = []
     total_imported = 0
@@ -83,7 +75,6 @@ def run_bulk_import(db, job_id, schema, file_paths, column_mapping, batch_label,
         filename = os.path.basename(file_path)
         file_errors = []
         imported = 0
-        row_num = 1  # header is row 1
 
         try:
             rows = list(_read_file_rows(file_path))
@@ -97,7 +88,7 @@ def run_bulk_import(db, job_id, schema, file_paths, column_mapping, batch_label,
 
         total_rows = len(rows)
         for i, source_row in enumerate(rows):
-            row_num = i + 2  # +1 for header, +1 for 1-indexing
+            row_num = i + 2
             mapped_data = {}
             for field in fields:
                 source_col = column_mapping.get(field["name"])
@@ -119,7 +110,7 @@ def run_bulk_import(db, job_id, schema, file_paths, column_mapping, batch_label,
             "total": total_rows,
             "imported": imported,
             "failed": len(file_errors),
-            "errors": file_errors[:50],  # cap so a badly-mapped file doesn't flood the UI
+            "errors": file_errors[:50],
         })
         progress_cb(file_index + 1, len(file_paths), filename, total_rows, total_rows)
 

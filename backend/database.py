@@ -2,9 +2,13 @@
 Local SQLite data layer for Cerberus Desktop.
 
 Tables:
-  schemas    - user-defined record templates (field definitions as JSON)
-  records    - actual data rows, stored as JSON so any schema fits one table
-  audit_log  - append-only change history per record
+  schemas          - user-defined record templates (field definitions as JSON)
+  records          - actual data rows, stored as JSON so any schema fits one table
+  audit_log        - append-only change history. Tagged with schema_id at write
+                      time (not looked up later) so history survives even if the
+                      record itself is later deleted.
+  jobs             - background jobs (bulk import today; OCR/scraping later)
+  duplicate_flags  - fuzzy-match duplicate pairs awaiting manual review
 """
 
 import sqlite3
@@ -57,6 +61,7 @@ class Database:
                 CREATE TABLE IF NOT EXISTS audit_log (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     record_id INTEGER NOT NULL,
+                    schema_id INTEGER,
                     change_json TEXT NOT NULL,
                     timestamp TEXT NOT NULL
                 );
@@ -74,9 +79,22 @@ class Database:
                     updated_at TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS duplicate_flags (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    schema_id INTEGER NOT NULL,
+                    record_id INTEGER NOT NULL,
+                    matched_record_id INTEGER NOT NULL,
+                    similarity_score REAL NOT NULL,
+                    resolution_status TEXT NOT NULL DEFAULT 'pending',
+                    created_at TEXT NOT NULL,
+                    resolved_at TEXT
+                );
+
                 CREATE INDEX IF NOT EXISTS idx_records_schema ON records(schema_id);
                 CREATE INDEX IF NOT EXISTS idx_audit_record ON audit_log(record_id);
+                CREATE INDEX IF NOT EXISTS idx_audit_schema ON audit_log(schema_id);
                 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+                CREATE INDEX IF NOT EXISTS idx_dupflags_schema_status ON duplicate_flags(schema_id, resolution_status);
                 """
             )
 
@@ -143,8 +161,8 @@ class Database:
             )
             record_id = cur.lastrowid
             conn.execute(
-                "INSERT INTO audit_log (record_id, change_json, timestamp) VALUES (?, ?, ?)",
-                (record_id, json.dumps({"action": "create", "data": data}), now),
+                "INSERT INTO audit_log (record_id, schema_id, change_json, timestamp) VALUES (?, ?, ?, ?)",
+                (record_id, schema_id, json.dumps({"action": "create", "data": data}), now),
             )
             return record_id
 
@@ -161,16 +179,18 @@ class Database:
                 (json.dumps(new_data), new_status, now, record_id),
             )
             conn.execute(
-                "INSERT INTO audit_log (record_id, change_json, timestamp) VALUES (?, ?, ?)",
-                (record_id, json.dumps({"action": "update", "data": new_data, "status": new_status}), now),
+                "INSERT INTO audit_log (record_id, schema_id, change_json, timestamp) VALUES (?, ?, ?, ?)",
+                (record_id, current["schema_id"], json.dumps({"action": "update", "data": new_data, "status": new_status}), now),
             )
             return True
 
     def delete_record(self, record_id):
         with DB_LOCK, self._connect() as conn:
+            current = conn.execute("SELECT * FROM records WHERE id = ?", (record_id,)).fetchone()
+            schema_id = current["schema_id"] if current else None
             conn.execute(
-                "INSERT INTO audit_log (record_id, change_json, timestamp) VALUES (?, ?, ?)",
-                (record_id, json.dumps({"action": "delete"}), _now()),
+                "INSERT INTO audit_log (record_id, schema_id, change_json, timestamp) VALUES (?, ?, ?, ?)",
+                (record_id, schema_id, json.dumps({"action": "delete"}), _now()),
             )
             conn.execute("DELETE FROM records WHERE id = ?", (record_id,))
             return True
@@ -199,9 +219,7 @@ class Database:
             "updated_at": row["updated_at"],
         }
 
-    # ---------------- Audit log ----------------
-
-    # ---------------- Jobs (bulk import, and later OCR / scraping) ----------------
+    # ---------------- Jobs ----------------
 
     def create_job(self, job_type, schema_id=None, title=None):
         with DB_LOCK, self._connect() as conn:
@@ -259,12 +277,114 @@ class Database:
             "updated_at": row["updated_at"],
         }
 
+    # ---------------- Audit log ----------------
+
     def get_audit_log(self, record_id):
         with DB_LOCK, self._connect() as conn:
             rows = conn.execute(
                 "SELECT * FROM audit_log WHERE record_id = ? ORDER BY timestamp DESC", (record_id,)
             ).fetchall()
-            return [
-                {"id": r["id"], "record_id": r["record_id"], "change": json.loads(r["change_json"]), "timestamp": r["timestamp"]}
-                for r in rows
-            ]
+            return [self._audit_row_to_dict(r) for r in rows]
+
+    def list_recent_audit_log(self, limit=100, schema_id=None):
+        with DB_LOCK, self._connect() as conn:
+            if schema_id:
+                rows = conn.execute(
+                    "SELECT * FROM audit_log WHERE schema_id = ? ORDER BY timestamp DESC LIMIT ?",
+                    (schema_id, limit),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?", (limit,)
+                ).fetchall()
+            return [self._audit_row_to_dict(r) for r in rows]
+
+    @staticmethod
+    def _audit_row_to_dict(row):
+        return {
+            "id": row["id"],
+            "record_id": row["record_id"],
+            "schema_id": row["schema_id"],
+            "change": json.loads(row["change_json"]),
+            "timestamp": row["timestamp"],
+        }
+
+    # ---------------- Duplicate flags ----------------
+
+    def create_duplicate_flag(self, schema_id, record_id, matched_record_id, similarity_score):
+        with DB_LOCK, self._connect() as conn:
+            cur = conn.execute(
+                """INSERT INTO duplicate_flags
+                   (schema_id, record_id, matched_record_id, similarity_score, resolution_status, created_at)
+                   VALUES (?, ?, ?, ?, 'pending', ?)""",
+                (schema_id, record_id, matched_record_id, similarity_score, _now()),
+            )
+            return cur.lastrowid
+
+    def flag_exists(self, schema_id, record_id, matched_record_id):
+        """
+        Checks both orderings so (A,B) and (B,A) aren't both flagged, and
+        checks ANY status (not just pending) - once a human has reviewed a
+        pair and marked it 'not_duplicate', it must never be re-flagged by
+        a future scan just because the same two records still fuzzy-match.
+        """
+        with DB_LOCK, self._connect() as conn:
+            row = conn.execute(
+                """SELECT id FROM duplicate_flags
+                   WHERE schema_id = ?
+                   AND ((record_id = ? AND matched_record_id = ?) OR (record_id = ? AND matched_record_id = ?))""",
+                (schema_id, record_id, matched_record_id, matched_record_id, record_id),
+            ).fetchone()
+            return row is not None
+
+    def list_duplicate_flags(self, schema_id, status="pending"):
+        with DB_LOCK, self._connect() as conn:
+            if status:
+                rows = conn.execute(
+                    "SELECT * FROM duplicate_flags WHERE schema_id = ? AND resolution_status = ? ORDER BY created_at DESC",
+                    (schema_id, status),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM duplicate_flags WHERE schema_id = ? ORDER BY created_at DESC", (schema_id,)
+                ).fetchall()
+            return [self._flag_row_to_dict(r) for r in rows]
+
+    def count_pending_flags(self, schema_id=None):
+        with DB_LOCK, self._connect() as conn:
+            if schema_id:
+                row = conn.execute(
+                    "SELECT COUNT(*) as c FROM duplicate_flags WHERE schema_id = ? AND resolution_status = 'pending'",
+                    (schema_id,),
+                ).fetchone()
+            else:
+                row = conn.execute(
+                    "SELECT COUNT(*) as c FROM duplicate_flags WHERE resolution_status = 'pending'"
+                ).fetchone()
+            return row["c"]
+
+    def resolve_duplicate_flag(self, flag_id, resolution_status):
+        with DB_LOCK, self._connect() as conn:
+            conn.execute(
+                "UPDATE duplicate_flags SET resolution_status = ?, resolved_at = ? WHERE id = ?",
+                (resolution_status, _now(), flag_id),
+            )
+            return True
+
+    def get_duplicate_flag(self, flag_id):
+        with DB_LOCK, self._connect() as conn:
+            row = conn.execute("SELECT * FROM duplicate_flags WHERE id = ?", (flag_id,)).fetchone()
+            return self._flag_row_to_dict(row) if row else None
+
+    @staticmethod
+    def _flag_row_to_dict(row):
+        return {
+            "id": row["id"],
+            "schema_id": row["schema_id"],
+            "record_id": row["record_id"],
+            "matched_record_id": row["matched_record_id"],
+            "similarity_score": row["similarity_score"],
+            "resolution_status": row["resolution_status"],
+            "created_at": row["created_at"],
+            "resolved_at": row["resolved_at"],
+        }

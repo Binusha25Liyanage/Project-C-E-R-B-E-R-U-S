@@ -17,7 +17,7 @@ FRONTEND_INDEX = os.path.join(os.path.dirname(__file__), "frontend", "index.html
 def main():
     api = Api()
     window = webview.create_window(
-        "C E R B E R U S",
+        "Cerberus Desktop",
         FRONTEND_INDEX,
         js_api=api,
         width=1280,
@@ -26,7 +26,6 @@ def main():
     )
     api.window = window  # so Api methods can open file dialogs
     webview.start(debug=False)
-
 
 
 if __name__ == "__main__":

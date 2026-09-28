@@ -1,12 +1,7 @@
 """
-Generic background job runner. This is what makes the "tab" UI actually
-work - a job keeps running in Python regardless of which tab is on screen,
-and the frontend just polls its status by job_id.
-
-Capped at MAX_WORKERS concurrent jobs on purpose: unlimited background
-OCR/scrape/import jobs would be easy to fire off from a tab-based UI and
-would happily choke a single machine, so this is a deliberate ceiling,
-not an oversight.
+Generic background job runner. A job keeps running in Python regardless of
+which tab is on screen; the frontend polls its status by job_id.
+Capped at MAX_WORKERS concurrent jobs on purpose.
 """
 
 from concurrent.futures import ThreadPoolExecutor
@@ -20,11 +15,6 @@ class JobManager:
         self.executor = ThreadPoolExecutor(max_workers=MAX_WORKERS)
 
     def submit(self, job_type, target_fn, schema_id=None, title=None, args=()):
-        """
-        target_fn(job_id, progress_cb, *args) runs on a worker thread.
-        progress_cb(dict) updates the job's progress_json for polling.
-        target_fn's return value becomes the job's result_json.
-        """
         job_id = self.db.create_job(job_type, schema_id=schema_id, title=title)
 
         def progress_cb(progress_dict):

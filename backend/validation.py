@@ -1,30 +1,18 @@
 """
 Validates a record's data dict against its schema's field_definitions.
-
-Each field definition looks like:
-{
-    "name": "customer_id",       # key in the data dict
-    "label": "Customer ID",      # shown in the UI
-    "type": "text" | "number" | "date" | "dropdown" | "boolean",
-    "required": true/false,
-    "options": ["A", "B"],       # only for dropdown
-    "pattern": "^[0-9]{10}$"     # optional regex, only for text
-}
-
-Returns (is_valid: bool, errors: dict[field_name -> message], cleaned_data: dict)
-Pydantic handles type coercion; regex/dropdown membership are checked separately
-since they're per-field business rules rather than base types.
+Returns (is_valid, errors, cleaned_data). Pydantic handles type coercion;
+regex/dropdown membership are checked separately as business rules.
 """
 
 import re
 import datetime
-from typing import Optional, Any
+from typing import Optional
 from pydantic import create_model, ValidationError
 
 _TYPE_MAP = {
     "text": str,
     "number": float,
-    "date": str,  # kept as ISO string; validated with a regex/parse check below
+    "date": str,  # kept as ISO string, validated below
     "dropdown": str,
     "boolean": bool,
 }
@@ -46,8 +34,6 @@ def _build_model(field_defs):
 def validate_record(field_defs, data):
     errors = {}
     model_cls = _build_model(field_defs)
-
-    # Only pass through keys that are actually defined on the schema
     relevant_data = {f["name"]: data.get(f["name"]) for f in field_defs}
 
     try:
@@ -59,14 +45,13 @@ def validate_record(field_defs, data):
             field_name = err["loc"][0]
             errors[field_name] = _friendly_message(err)
 
-    # Custom per-field rules that pydantic's base types don't cover
     for f in field_defs:
         name = f["name"]
         if name in errors:
             continue
         value = cleaned.get(name)
         if value in (None, ""):
-            continue  # required-ness already handled above
+            continue
 
         if f["type"] == "dropdown":
             options = f.get("options", [])
